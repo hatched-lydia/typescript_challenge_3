@@ -1,10 +1,14 @@
-type ValidJSON = ValidJSONObject; // | ... | ... | ...
+type ValidJSON = ValidJSONObject;
+type isPrimitive = string | number | boolean;
+type isReference = object | isPrimitive[] | isNullAndUndefined;
+type isNullAndUndefined = null | undefined;
 
 interface ValidJSONObject {
-  // ...
+  input: isPrimitive | isReference | isNullAndUndefined;
+  [key: string]: isPrimitive | isReference | isNullAndUndefined;
 }
 
-export const stringify = (input: ValidJSONObject): string => {
+export const stringify = (input: ValidJSONObject["input"]): string => {
   if (
     typeof input === "number" ||
     typeof input === "boolean" ||
@@ -14,7 +18,7 @@ export const stringify = (input: ValidJSONObject): string => {
   }
 
   if (typeof input === "string") {
-    const inputStrArr = input.split(/\n/);
+    const inputStrArr: Array<string> = input.split(/\n/);
 
     if (inputStrArr.length > 1) {
       return `"${inputStrArr.join(/\n/)}"`.replace(/\//g, "");
@@ -23,14 +27,15 @@ export const stringify = (input: ValidJSONObject): string => {
     }
   }
 
-  let results = [];
+  let results: string[] = [];
   if (Array.isArray(input)) {
     input.forEach((element) => results.push(stringify(element)));
     return `[${results.join(",")}]`;
   } else {
     for (let key in input) {
-      if (input[key] !== undefined || typeof input[key] !== "function") {
-        results.push(`${stringify(key)}:${stringify(input[key])}`);
+      const value: isPrimitive = input[key];
+      if (value !== undefined || typeof value !== "function") {
+        results.push(`${stringify(key)}:${stringify(value)}`);
       }
     }
     return `{${results.join(",")}}`;
