@@ -33,7 +33,7 @@ export const stringify = (input: ValidJSONObject["input"]): string => {
     return `[${results.join(",")}]`;
   } else {
     for (let key in input) {
-      const value: isPrimitive = input[key];
+      const value: ValidJSONObject["input"] = input[key];
       if (value !== undefined || typeof value !== "function") {
         results.push(`${stringify(key)}:${stringify(value)}`);
       }
